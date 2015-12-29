@@ -1,5 +1,5 @@
 # nw-om
-om template for nwjs
+boot template for nwjs with om
 
 ## build and run
 
