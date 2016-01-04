@@ -16,6 +16,7 @@
                  [prismatic/om-tools "0.4.0"]
                  [secretary "1.2.3"]
                  [sablono "0.4.0" :exclusions [cljsjs/react]]
+		 [cljsjs/d3 "3.5.7-1"]
                  [org.clojure/clojure       "1.7.0"]
                  [org.clojure/clojurescript "1.7.189"]])
 
