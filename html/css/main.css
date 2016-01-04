@@ -1,1 +1,17 @@
 /* style */
+
+
+svg {
+  font: 10px sans-serif;
+}
+.line {
+  fill: none;
+  stroke: #00ff00;
+  stroke-width: 1.5px;
+}
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #ff0000;
+  shape-rendering: crispEdges;
+}

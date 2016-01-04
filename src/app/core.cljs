@@ -31,11 +31,12 @@
          random (js/d3.random.normal 0 0.2)
          data (-> (js/d3.range n)
                   (.map random))
+
          margin {:top 20 :right 20 :bottom 20 :left 40}
          width (- 960 (:left margin) (:right margin))
          height (- 500 (:top margin) (:bottom margin))
          x (-> (js/d3.scale.linear)
-               (.domain #js [0 (- n 2)])
+               (.domain #js [1 (- n 2)])
                (.range #js [0 width]))
          y (-> (js/d3.scale.linear)
                (.domain #js [-1 1])
@@ -46,7 +47,7 @@
                         (x i)))
                   (.y (fn [d i]
                         (y d))))
-         _ (js/console.log "line:" line)
+
          svg (-> (js/d3.select "#chart-canvas")
                  (.append "svg")
                  (.attr "width"
@@ -86,7 +87,7 @@
                (.append "g")
                (.attr "clip-path" "url(#clip)")
                (.append "path")
-               (.data data)
+               (.data #js [data])
                (.attr "class" "line")
                (.attr "d" line))
          tick (fn tick []

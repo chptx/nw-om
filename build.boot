@@ -17,6 +17,7 @@
                  [secretary "1.2.3"]
                  [sablono "0.4.0" :exclusions [cljsjs/react]]
 		 [cljsjs/d3 "3.5.7-1"]
+                 [cljsjs/dygraph "1.1.1-0"]
                  [org.clojure/clojure       "1.7.0"]
                  [org.clojure/clojurescript "1.7.189"]])
 
@@ -33,7 +34,7 @@
         (speak)
         (reload :on-jsload 'app.core/main)
         (cljs-repl)
-        (cljs :source-map false :optimizations :none)))
+        (cljs :source-map true :optimizations :none)))
 
 (deftask build []
   (set-env! :source-paths #{"src"})
