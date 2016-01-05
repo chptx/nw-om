@@ -8,6 +8,10 @@
             [goog.history.EventType :as EventType]
             [app.global :as g]
             cljsjs.d3
+            cljsjs.dygraph
+            cljsjs.long
+            cljsjs.bytebuffer
+            [node.fs :as fs]
             [nw.gui :as ngui])
 
 (:import goog.History))
@@ -16,6 +20,30 @@
 
 (sec/set-config! :prefix "#")
 
+(defn- create-dygraph [container data labels]
+  (js/Dygraph. container data (clj->js {:drawPoints false
+                                       :showRoller false
+                                        ;:series {"b" {:axis "y2"}}
+                                        :drawAxesAtZero true
+                                        :axes
+                                        {
+                                         :y {
+                                             :drawAxis false
+                                             }
+                                        
+                                         }
+                                       :labels labels})))
+(defn- update-data [data unit]
+  (.push data unit)
+  (.shift data))
+
+(defn- init-data []
+  (let [t (.getTime (js/Date.))]
+    (clj->js
+     (map
+      (fn [i] [(js/Date. (- t (* i 1000))) (js/Math.random) (js/Math.random)])
+      (rseq (vec (range 100)))))))
+
 ;;setup history API
 (let [history (History.)
       navigation EventType/NAVIGATE]
@@ -23,6 +51,7 @@
                       navigation
                       #(-> % .-token sec/dispatch!))
   (doto history (.setEnabled true)))
+
 
 (defcomponent d3-view [app owner]
   (did-mount
@@ -109,11 +138,44 @@
    (html
     [:div#chart-canvas])))
 
+(defcomponent dygraph-view [app owner]
+  (did-mount
+   [_]
+   (let [c (om/get-node owner "chart-canvas")]
+     (create-dygraph c (init-data) ["a" "b" "c"])))
+  (render
+   [_]
+   (html
+    [:div {:ref "chart-canvas"}])))
+
 (defcomponent hello [app owner]
   (render
    [_]
    (html
-    (om/build d3-view app))))
+    (om/build dygraph-view app))))
+
+(defn- choose-file [name cb]
+  (let [chooser (js/document.querySelector name)]
+    (.addEventListener
+     chooser
+     "change"
+     (fn [evt]
+       (this-as this
+                (js/console.log "evt" (aget this "value"))
+                (when-let [fname (aget this "value")]
+                  (cb fname))))
+     false)
+    (.click chooser)))
+
+
+(defn- process-buffer [err cnt buf]
+  (let [bs (js/Uint8Array. buf)
+        bb (.append (js/ByteBuffer.) bs)]
+    (js/console.log "bb:" (.readByte bb 0))))
+
+(defn- process-file [err fd]
+  (let [buf (js/Buffer. 32)]
+    (fs/read fd buf 1 10 process-buffer)))
 
 (defn- init-menu []
   (let [submenu (ngui/create-menu)
@@ -132,10 +194,12 @@
                                 :submenu submenu}))
 
     (aset item1 "click" (fn []
-                         (js/console.log "test menu click 2")))
+                          (js/console.log "test menu click 2")
+                          (choose-file "#fileDialog" (fn [f] (fs/open-file-ro f process-buffer)))))
     (ngui/set-menu-root menu)))
 
 (defn main []
+;  (fs/open-file-ro "/etc/hosts" process-file)
   (init-menu)
   (om/root hello
            g/app-state
