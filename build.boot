@@ -12,6 +12,8 @@
                  [net.unit8/tower-cljs "0.1.0" :scope "test"]
                  [boot-deps "0.1.6" :scope "test"]
                  [org.omcljs/om "0.9.0" :exclusions [cljsjs/react]]
+                 [racehub/om-bootstrap "0.5.3" :exclusions [prismatic/schema]]
+                 [prismatic/schema "1.0.4"]
                  [cljsjs/react "0.14.3-0"]
                  [prismatic/om-tools "0.4.0"]
                  [secretary "1.2.3"]

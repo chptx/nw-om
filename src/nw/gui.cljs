@@ -25,3 +25,23 @@
   (let [w (aget gui "Window")
         iw (jsm/this-call w get)]
     (aset iw "menu" menu)))
+
+(defn maximize []
+  (let [w (aget gui "Window")
+        iw (jsm/this-call w get)]
+    (jsm/this-call iw maximize)))
+
+(defn set-resizable [s]
+  (let [w (aget gui "Window")
+        iw (jsm/this-call w get)]
+    (jsm/this-call iw setResizable s)))
+
+(defn close-window []
+  (let
+    [w (aget gui "Window")
+     iw (jsm/this-call w get)]
+    (jsm/this-call iw close)))
+
+(defn exit-app []
+  (let [w (aget gui "App")]
+    (jsm/this-call w quit)))

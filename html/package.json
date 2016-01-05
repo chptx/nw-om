@@ -2,7 +2,7 @@
     "name": "nwjs om",
     "main": "index.html",
     "window": {
-        "toolbar": true,
-        "frame": true
+        "toolbar": false,
+        "frame": false
     }
 }

@@ -7,10 +7,13 @@
             [goog.events :as events]
             [goog.history.EventType :as EventType]
             [app.global :as g]
-            cljsjs.d3
+            #_cljsjs.d3
             cljsjs.dygraph
             cljsjs.long
             cljsjs.bytebuffer
+            [om-bootstrap.button :as b]
+            [om-bootstrap.nav :as n]
+            [om-bootstrap.random :as r]
             [node.fs :as fs]
             [nw.gui :as ngui])
 
@@ -25,6 +28,7 @@
                                        :showRoller false
                                         ;:series {"b" {:axis "y2"}}
                                         :drawAxesAtZero true
+                                        ;:width "100%"
                                         :axes
                                         {
                                          :y {
@@ -53,7 +57,7 @@
   (doto history (.setEnabled true)))
 
 
-(defcomponent d3-view [app owner]
+#_(defcomponent d3-view [app owner]
   (did-mount
    [_]
    (let [n 40
@@ -138,21 +142,26 @@
    (html
     [:div#chart-canvas])))
 
+(defn- reset-chart []
+  (let [c
+        (js/document.querySelector "#chart-canvas")]
+    (create-dygraph c (init-data) ["a" "b" "c"])))
+
 (defcomponent dygraph-view [app owner]
   (did-mount
    [_]
-   (let [c (om/get-node owner "chart-canvas")]
-     (create-dygraph c (init-data) ["a" "b" "c"])))
+   #_(ngui/set-resizable false)
+   (reset-chart))
   (render
    [_]
    (html
-    [:div {:ref "chart-canvas"}])))
 
-(defcomponent hello [app owner]
-  (render
-   [_]
-   (html
-    (om/build dygraph-view app))))
+    [:div#chart-canvas
+     {:style {:width "100%"
+              :minHeight "640px"}}
+     ])))
+
+
 
 (defn- choose-file [name cb]
   (let [chooser (js/document.querySelector name)]
@@ -180,27 +189,59 @@
 (defn- init-menu []
   (let [submenu (ngui/create-menu)
         menu (ngui/create-menubar)
-        item1 (ngui/create-menuitem #js {:label "item 1"})]
+        load-file (ngui/create-menuitem #js {:label "载入.."})
+        window-exit (ngui/create-menuitem #js {:label "退出"})]
     
     (ngui/append-menuitem
      submenu
-     item1
-     (ngui/create-menuitem #js {:label "item 3"})
-     (ngui/create-menuitem #js {:label "item 5"}))
+     load-file
+     window-exit)
     
     (ngui/append-menuitem
      menu
-     (ngui/create-menuitem #js {:label "Main menu"
+     (ngui/create-menuitem #js {:label "文件"
                                 :submenu submenu}))
-
-    (aset item1 "click" (fn []
-                          (js/console.log "test menu click 2")
-                          (choose-file "#fileDialog" (fn [f] (fs/open-file-ro f process-buffer)))))
+    (aset window-exit "click" (fn []
+                                (ngui/exit-app)))
+    (aset load-file "click" (fn []
+                              (choose-file "#fileDialog" (fn [f] (fs/open-file-ro f process-buffer)))))
     (ngui/set-menu-root menu)))
 
+
+(defcomponent hello [app owner]
+  (render
+   [_]
+   (html
+    [:div
+     (n/navbar {:brand "test"}
+               (b/button {:class "navbar-right"
+                          :bs-style "danger"
+                          :onClick (fn []
+                                     (ngui/close-window))}
+                         (r/glyphicon {:glyph "remove"}))
+               (n/nav {}
+                      (b/dropdown {:title "文件"}
+                                  (b/menu-item {:key 1
+                                                :onClick
+                                                (fn []
+                                                  (choose-file "#fileDialog" (fn [f] (fs/open-file-ro f process-buffer))))} "载入..")
+                                  (b/menu-item {:divider? true})
+                                  (b/menu-item {:key 2
+                                                :onClick
+                                                (fn []
+                                                  (ngui/close-window))} "退出")
+                                  )
+               )
+               (b/button {:bs-style "primary"}
+                           "test")
+
+                )
+     (om/build dygraph-view app)])))
+
 (defn main []
+  (ngui/maximize)
 ;  (fs/open-file-ro "/etc/hosts" process-file)
-  (init-menu)
+  #_(init-menu)
   (om/root hello
            g/app-state
            {:target (. js/document (getElementById "app"))}))

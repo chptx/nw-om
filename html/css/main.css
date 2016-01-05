@@ -15,3 +15,11 @@ svg {
   stroke: #ff0000;
   shape-rendering: crispEdges;
 }
+
+.container {
+    width: 100%;
+}
+
+nav {
+    -webkit-user-select: none;
+}
